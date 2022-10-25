@@ -1,4 +1,5 @@
 out/
 *.jar
+links.db
 
 .DS_Store

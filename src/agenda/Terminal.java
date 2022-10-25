@@ -3,8 +3,11 @@ package agenda;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.regex.Pattern;
+
+import agenda.InvalidLinkExceptionFactory.InvalidLinkException;
 
 /**
  * Lanciata quando viene interrogato per input un terminal chiuso.
@@ -128,7 +131,11 @@ public class Terminal {
      */
     private boolean isLinkWorking(String link) {
         try {
-            return ((HttpURLConnection) new URL(link).openConnection()).getResponseCode() == HttpURLConnection.HTTP_OK;
+            URLConnection connection = new URL(link).openConnection();
+            if (connection instanceof HttpURLConnection) {
+                return ((HttpURLConnection) connection).getResponseCode() == HttpURLConnection.HTTP_OK;
+            }
+            return false;
         } catch (IOException e) {
             return false;
         }
@@ -137,7 +144,7 @@ public class Terminal {
     /**
      * Richiede all'utente un nuovo link.
      */
-    void nextLink() throws InvalidLinkExceptionFactory.InvalidLinkException, ClosedTerminalException, IOException {
+    void nextLink() throws InvalidLinkException, ClosedTerminalException, IOException {
         if (!this.open) {
             throw new ClosedTerminalException();
         }
