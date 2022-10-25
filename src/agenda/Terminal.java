@@ -1,10 +1,15 @@
 package agenda;
 
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.regex.Pattern;
+
+import agenda.InvalidLinkExceptionFactory.LinkHealth;
+import agenda.InvalidLinkExceptionFactory.InvalidLinkException;;
 
 /**
  * Lanciata quando viene interrogato per input un terminal chiuso.
@@ -37,8 +42,8 @@ class InvalidLinkExceptionFactory {
         }
     }
 
-    boolean alreadyExists;
-    LinkHealth linkHealth;
+    boolean alreadyExists = false;
+    LinkHealth linkHealth = LinkHealth.OK;
 
     boolean isValid() {
         return !this.alreadyExists && linkHealth == LinkHealth.OK;
@@ -78,6 +83,7 @@ class InvalidLinkExceptionFactory {
 public class Terminal {
     private CLI cli;
     private boolean open;
+    private ArrayList<String> links;
 
     /**
      * Specifica quali sono i protocolli (http, https per ora) accettati.
@@ -87,6 +93,7 @@ public class Terminal {
     Terminal() {
         this.cli = new CLI();
         this.open = true;
+        this.links = new ArrayList<String>();
         System.out.println("Terminale aperto.");
     }
 
@@ -107,7 +114,14 @@ public class Terminal {
      * Salva i link su file.
      */
     private void saveLinks() {
-        // TODO: Implementare
+        try {
+            FileWriter db = new FileWriter("links.db");
+            String links = String.join(",", this.links);
+            db.write(links);
+            db.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -128,7 +142,11 @@ public class Terminal {
      */
     private boolean isLinkWorking(String link) {
         try {
-            return ((HttpURLConnection) new URL(link).openConnection()).getResponseCode() == HttpURLConnection.HTTP_OK;
+            URLConnection connection = new URL(link).openConnection();
+            if (connection instanceof HttpURLConnection) {
+                return ((HttpURLConnection) connection).getResponseCode() == HttpURLConnection.HTTP_OK;
+            }
+            return false;
         } catch (IOException e) {
             return false;
         }
@@ -137,7 +155,7 @@ public class Terminal {
     /**
      * Richiede all'utente un nuovo link.
      */
-    void nextLink() throws InvalidLinkExceptionFactory.InvalidLinkException, ClosedTerminalException, IOException {
+    void nextLink() throws InvalidLinkException, ClosedTerminalException, IOException {
         if (!this.open) {
             throw new ClosedTerminalException();
         }
@@ -146,16 +164,32 @@ public class Terminal {
             String link = this.cli.askForString().trim();
             if (link.isEmpty()) {
                 this.close();
+            } else {
+                this.testLink(link);
             }
-
-            this.testLink();
         } catch (IOException e) {
             this.close();
             throw e;
         }
     }
 
-    private void testLink() {
-        // TODO: Implementare
+    private void testLink(String link) throws InvalidLinkException {
+        InvalidLinkExceptionFactory factory = new InvalidLinkExceptionFactory();
+
+        if (this.links.contains(link)) {
+            factory.alreadyExists = true;
+        }
+
+        if (!this.isLinkValid(link)) {
+            factory.linkHealth = LinkHealth.INVALID;
+        } else if (!this.isLinkWorking(link)) {
+            factory.linkHealth = LinkHealth.UNREACHABLE;
+        }
+
+        if (!factory.isValid()) {
+            System.err.println(factory.create().getMessage());
+        } else {
+            this.links.add(link);
+        }
     }
 }
