@@ -45,7 +45,7 @@ a presentare esempi di come un processo di *Design del software* porta a
 decostruire **il problema** che si risolve nell'esercizio.
 
 All'interno delle specifiche, qualora si ritenga opportuno un commento
-dell'autore, questo verrà inserito coem quote, simile alla successiva:
+dell'autore, questo verrà inserito come quote, simile alla successiva:
 
 > *Questo è un commento dell'autore*
 
@@ -76,7 +76,7 @@ ciò che è necessario permettergli di acquisire la conoscenza presentata.
 Per ogni esercizio, l'utente verrà equipaggiato con i documenti e setup
 necessari per lavorare al progetto.
 
-L'insieme di esercizi è presentato dal punto di vista di una piccola aziente.
+L'insieme di esercizi è presentato dal punto di vista di una piccola azienda.
 L'utente riveste il ruolo di sviluppatore, mentre il capo ingegnere gli
 fornisce le **specifiche** del progetto all'utente.
 
@@ -87,7 +87,7 @@ mediante la **documentazione**.
 
 # Template
 
-Ogni esercizio, oltre alle **specifiche** viene resentato con un template, che
+Ogni esercizio, oltre alle **specifiche** viene presentato con un template, che
 ha l'obiettivo di togliere all'utente le necessità di setup. Tutto ciò che vi è
 presente, è però documentato. Nelle **specifiche** tale **documentazione** verrà
 utilizzata, ma vi si farà riferimento, mentre i dettagli vengono lasciati
