@@ -5,6 +5,18 @@ ECHO.
 SET SRC_DIR="./src"
 SET OUT_DIR="./out"
 
+IF "%1" == "clean" (
+GOTO:CLEAN
+) ELSE IF "%1" == "setup" (
+ GOTO:SETUP
+) ELSE IF "%1" == "build" (
+GOTO:BUILD
+) ELSE IF "%1" == "build_clean" (
+GOTO:BUILD_CLEAN
+) ELSE (
+GOTO:NO_ARG
+)
+
 :NO_ARG
 ECHO "Valid arguments: clean, setup, build, build_clean"
 EXIT /B 0
@@ -13,12 +25,14 @@ EXIT /B 0
 :CLEAN
 rm -rf %SRC_DIR%
 rm -f ManagerSegnalibri.jar
+@ECHO CLEAN eseguito
 EXIT /B 0
 
 :: Crea le cartelle e i file necessari per la creazione dell'eseguibile
 :SETUP
 MKDIR %OUT_DIR%/
 COPY %SRC_DIR%/**/* %OUT_DIR%/
+@ECHO SETUP eseguito
 EXIT /B 0
 
 :: Genera l'eseguibile
@@ -32,16 +46,11 @@ EXIT /B 0
 CALL :SETUP
 javac %SRC_DIR%/**/*.java -d %OUT_DIR%/
 jar --create --file ManagerSegnalibri.jar --main-class agenda.Main -C %OUT_DIR%/ agenda
+@ECHO BUILD eseguito
 EXIT /B 0
 
 :BUILD_CLEAN
 CALL :CLEAN
 CALL :BUILD
+@ECHO BUILD_CLEAN ESEGUITO
 EXIT /B 0
-
-
-IF %1=="clean" CALL :CLEAN
-ELSE IF %1=="setup" CALL :SETUP
-ELSE IF %1=="build" CALL :BUILD
-ELSE IF %1=="build_clean" CALL :BUILD_CLEAN
-ELSE CALL :NO_ARG
