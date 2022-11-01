@@ -13,7 +13,7 @@ GOTO:CLEAN
 ) ELSE IF "%1" == "build" (
 GOTO:BUILD
 ) ELSE IF "%1" == "clean_build" (
-GOTO:CLEAN_BUILD
+GOTO:BUILD_CLEAN
 ) ELSE (
 GOTO:NO_ARG
 )
@@ -64,8 +64,8 @@ jar --create --file ManagerSegnalibri.jar --main-class agenda.Main -C %OUT_DIR%/
 @ECHO BUILD eseguito
 EXIT /B 0
 
-:CLEAN_BUILD
+:BUILD_CLEAN
 CALL :CLEAN
 CALL :BUILD
-@ECHO CLEAN_BUILD eseguito
+@ECHO BUILD_CLEAN eseguito
 EXIT /B 0
