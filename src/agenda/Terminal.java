@@ -1,10 +1,13 @@
 package agenda;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 import agenda.InvalidLinkExceptionFactory.InvalidLinkException;
@@ -74,6 +77,8 @@ class InvalidLinkExceptionFactory {
     }
 }
 
+
+
 /**
  * Rappresenta un terminale per l'utente per connettersi alla banca dati di
  * link.
@@ -81,7 +86,9 @@ class InvalidLinkExceptionFactory {
 public class Terminal {
     private CLI cli;
     private boolean open;
+    private final ArrayList<String> database = new ArrayList<>();
 
+    private static final String DATABASE_NAME = "links.db";
     /**
      * Specifica quali sono i protocolli (http, https per ora) accettati.
      */
@@ -110,11 +117,19 @@ public class Terminal {
      * Salva i link su file.
      */
     private void saveLinks() {
-        // TODO: Implementare
+        try(PrintWriter writer = new PrintWriter(DATABASE_NAME)){
+            for(String link : database) {
+                if(!Objects.equals(link, database.get(database.size() - 1))) writer.print(link + ",");
+                else writer.print(link);
+            }
+
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
-     * Vedi <code>VALID_PROTOCOLS</code> per i rotocolli accettati.
+     * Vedi <code>VALID_PROTOCOLS</code> per i protocolli accettati.
      * 
      * @param link il link
      * @return se il link è valido.
@@ -153,16 +168,48 @@ public class Terminal {
             String link = this.cli.askForString().trim();
             if (link.isEmpty()) {
                 this.close();
+                return; //Per non proseguire il codice e non lanciare l'eccezione invalidlinkexception (poco convincente *.*)
             }
+            this.testLink(link);
 
-            this.testLink();
-        } catch (IOException e) {
-            this.close();
-            throw e;
+        //aggiunto questo catch sennò si finisce sempre nell'eccezione generica I/O
+        //e si interrompeva il loop poichè viene chiamato this.close()
+        //non è questo che si vuole
+        }catch(InvalidLinkExceptionFactory.InvalidLinkException e){
+         throw e;
+        }catch (IOException e) {
+                this.close();
+                throw e;
         }
     }
 
-    private void testLink() {
-        // TODO: Implementare
+    /**
+     * Verifica il link se è valido e raggiungibile
+     * @param link il link
+     * @throws InvalidLinkException se il link è INVALID o UNREACHABLE
+     */
+    private void testLink(String link) throws InvalidLinkException {
+        //if(link == null) throw new IOException("Link must not be null");
+
+        InvalidLinkExceptionFactory invalidLink = new InvalidLinkExceptionFactory();
+
+
+        if(!this.isLinkValid(link)){
+            invalidLink.linkHealth = InvalidLinkExceptionFactory.LinkHealth.INVALID;
+            throw invalidLink.create();
+        }
+        if(!this.isLinkWorking(link)){
+            invalidLink.linkHealth = InvalidLinkExceptionFactory.LinkHealth.UNREACHABLE;
+            throw invalidLink.create();
+        }
+        invalidLink.linkHealth = InvalidLinkExceptionFactory.LinkHealth.OK;
+
+        if(database.contains(link)){
+            invalidLink.alreadyExists = true;
+            throw invalidLink.create();
+        }
+        if(invalidLink.isValid()){
+            this.database.add(link);
+        }
     }
 }
