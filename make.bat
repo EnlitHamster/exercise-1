@@ -12,7 +12,7 @@ GOTO:CLEAN
  GOTO:SETUP
 ) ELSE IF "%1" == "build" (
 GOTO:BUILD
-) ELSE IF "%1" == "clean_build" (
+) ELSE IF "%1" == "build_clean" (
 GOTO:BUILD_CLEAN
 ) ELSE (
 GOTO:NO_ARG
